@@ -4,3 +4,4 @@ prep/catalog.csv
 prep/fetch.log
 __pycache__/
 .DS_Store
+checkpoint/checkpoint_final.mp4
