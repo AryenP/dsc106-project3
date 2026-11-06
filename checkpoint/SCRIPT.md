@@ -5,7 +5,7 @@ About 150 words per minute. Edit freely and say it in your own words.
 
 | Time | Slide | Say |
 |---|---|---|
-| 0:00–0:08 | Title | "Hi, we're team **[TEAM NAME]**: **[member 1, member 2, member 3, member 4]**. Our project is *Warming by Scenario*." |
+| 0:00–0:08 | Title | "Hi, we're team **[TEAM NAME]**: **Aryen Palkar, Jayden Liauw, and Haoyu Lin**. Our project is *Warming by Scenario*." |
 | 0:08–0:22 | Dataset | "We're using CMIP6, the climate model runs on Google Cloud. We take monthly near-surface air temperature from nine models. Each model has a historical run and four future pathways, from SSP1-2.6, strong mitigation, up to SSP5-8.5, fossil-fuelled growth. We measure each model's warming against its own 1995-to-2014 average, then take the median across models." |
 | 0:22–0:33 | Graph 1 | "First, the global average. The pathways only separate after about 2040. By 2100 they're roughly three degrees apart." |
 | 0:33–0:44 | Graph 2 | "On the map, warming isn't even. Land warms more than ocean, and the Arctic warms the most." |
