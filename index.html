@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Warming by Scenario</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css?v=6">
+</head>
+<body>
+<header class="masthead">
+  <p class="kicker">DSC 106 · Project 3 · CMIP6</p>
+  <h1>Warming by Scenario</h1>
+  <p class="dek">How much hotter do the world's cities get under each CMIP6 emissions pathway, and how much of that heat is still a choice?</p>
+</header>
+
+<section class="controls" aria-label="Controls">
+  <div class="control">
+    <span class="control-label" id="scen-label">Pathway</span>
+    <div class="seg" id="scenario" role="radiogroup" aria-labelledby="scen-label"></div>
+  </div>
+  <div class="control control-time">
+    <label class="control-label" for="decade">Decade <output id="decade-out"></output></label>
+    <div class="time-row">
+      <button id="play" class="btn" type="button" aria-label="Play through decades">▶</button>
+      <input id="decade" type="range" min="0" max="7" step="1" value="3">
+    </div>
+  </div>
+  <div class="control">
+    <label class="control-label" for="region">Region</label>
+    <select id="region"></select>
+  </div>
+  <div class="control">
+    <label class="control-label" for="search">Add a city</label>
+    <input id="search" list="city-list" placeholder="Type a city…" autocomplete="off">
+    <datalist id="city-list"></datalist>
+  </div>
+</section>
+
+<p class="headline" id="headline" aria-live="polite"></p>
+
+<main class="grid">
+  <section class="panel panel-map">
+    <div class="panel-head">
+      <h2>Where it warms</h2>
+      <p class="sub" id="map-sub"></p>
+    </div>
+    <div id="map" class="map"></div>
+    <div id="map-legend" class="legend-ramp"></div>
+    <p class="hint">Scroll or pinch to zoom, drag to pan, double-click to reset. Hover anywhere for that grid cell's value. Click a city to add or remove it below.</p>
+  </section>
+
+  <section class="panel panel-rank">
+    <div class="panel-head">
+      <h2>City ranking</h2>
+      <p class="sub" id="rank-sub"></p>
+      <div class="rank-tools">
+        <span class="control-label">Sort by</span>
+        <div class="seg seg-small" id="sort" role="radiogroup" aria-label="Sort cities by">
+          <button type="button" data-k="value" aria-pressed="true">Warming</button>
+          <button type="button" data-k="gap" aria-pressed="false">Pathway gap</button>
+          <button type="button" data-k="lat" aria-pressed="false">Latitude</button>
+        </div>
+      </div>
+      <div id="scen-legend" class="scen-legend"></div>
+    </div>
+    <div id="rank-axis" class="rank-axis"></div>
+    <div id="rank" class="rank-scroll"></div>
+  </section>
+
+  <section class="panel panel-compare">
+    <div class="panel-head">
+      <h2>Compare cities over time</h2>
+      <p class="sub">Warming relative to each city's own 1995–2014 average. Lines are the median of 9 models (9-year running mean); the shaded band is the full model range for the selected pathway. The dashed line is the global mean under that pathway. Up to 4 cities.</p>
+    </div>
+    <div id="compare" class="compare"></div>
+  </section>
+</main>
+
+<div id="tooltip" class="tooltip" role="status" hidden></div>
+
+<article class="writeup">
+  <h2>About the data</h2>
+  <p><strong>Source.</strong> Monthly near-surface air temperature (<code>tas</code>, table <code>Amon</code>) from 9 CMIP6 models, ensemble member <code>r1i1p1f1</code>, read from the public CMIP6 Zarr bucket on Google Cloud: <span id="model-list"></span>. Each model contributes its <em>historical</em> run (1950–2014) and four ScenarioMIP runs (2015–2100):</p>
+  <ul>
+    <li><strong>SSP1-2.6</strong>: strong mitigation, net-zero CO₂ around mid-century.</li>
+    <li><strong>SSP2-4.5</strong>: middle of the road, roughly current policies.</li>
+    <li><strong>SSP3-7.0</strong>: regional rivalry, emissions roughly double by 2100.</li>
+    <li><strong>SSP5-8.5</strong>: fossil-fuelled development, the highest-emissions pathway.</li>
+  </ul>
+  <p><strong>Transformations.</strong></p>
+  <ol>
+    <li><em>Annual means</em> of the monthly values.</li>
+    <li><em>City values</em>: bilinear interpolation of each model's grid to the city-centre coordinates. Model grids are 1–2.8° wide (roughly 100–300 km), so a "city" value describes the surrounding region. It does not capture urban heat islands.</li>
+    <li><em>Anomalies</em>: every model's temperature minus <em>that model's own</em> 1995–2014 average at the same place. Models disagree about absolute temperature by several degrees, but they agree much better about change, so we pool the changes.</li>
+    <li><em>Ensemble</em>: median across the 9 models; the band shows the minimum and maximum model.</li>
+    <li><em>Map and ranking</em>: decade means (e.g. 2050–2059) of the annual anomaly. The map grid is re-interpolated to a common 2.5° grid. <em>Time-series lines</em>: 9-year centred running mean, so year-to-year weather noise doesn't hide the trend.</li>
+    <li>The colour scale and ranking axis are fixed across pathways and decades, so a colour or position always means the same number of degrees.</li>
+  </ol>
+  <p class="muted">Preprocessing code: <code>prep/fetch.py</code> and <code>prep/build.py</code> in this repository.</p>
+
+  <!-- TEAM: write these two sections yourselves; the rubric penalises AI-written write-ups.
+       Factual notes to draw from are in notes/DESIGN_NOTES.md. -->
+  <h2>Design rationale</h2>
+  <p class="todo">[Team to write: why these encodings and interactions, which alternatives you considered, and why you chose these.]</p>
+  <h2>Development process</h2>
+  <p class="todo">[Team to write: who did what, rough people-hours, what took the most time.]</p>
+</article>
+
+<script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
+<script src="js/main.js?v=6"></script>
+</body>
+</html>

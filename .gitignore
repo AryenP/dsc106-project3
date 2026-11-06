@@ -1,0 +1,6 @@
+.venv/
+prep/cache/
+prep/catalog.csv
+prep/fetch.log
+__pycache__/
+.DS_Store
