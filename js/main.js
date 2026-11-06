@@ -46,6 +46,7 @@
     sort: "value",
     selected: ["San Diego", "Delhi", "Yakutsk", "Reykjavík"],
     hover: null,
+    story: null,
   };
   const decLabel = (i) => `${DECADES[i]}s`;
   const val = (c, s = state.scen, i = state.dec) => c.dec[s].med[i];
@@ -140,6 +141,8 @@
 
   d3.selectAll("#sort button").on("click", function () {
     state.sort = this.dataset.k;
+    state.story = null;
+    renderStory();
     d3.selectAll("#sort button").attr("aria-pressed", function () { return this.dataset.k === state.sort; });
     updateRank();
   });
@@ -254,7 +257,12 @@
     drawRaster();
   });
   svg.call(zoom).on("dblclick.zoom", null)
-    .on("dblclick", () => svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity));
+    .on("dblclick", () => resetZoom());
+  // interpolating identity -> identity yields NaN in d3.interpolateZoom, so only animate when zoomed
+  function resetZoom() {
+    if (zt.k === 1 && zt.x === 0 && zt.y === 0) return;
+    svg.transition().duration(500).call(zoom.transform, d3.zoomIdentity);
+  }
 
   svg.on("mousemove", (ev) => {
     if (ev.target.classList.contains("city-dot")) return;
@@ -387,7 +395,7 @@
         return g;
       },
       (update) => update,
-      (exit) => exit.transition().duration(200).attr("opacity", 0).remove()
+      (exit) => exit.remove()
     );
     rows.classed("sel", (c) => state.selected.includes(c.name))
       .on("mouseenter", (ev, c) => { setHover(c.name); showTip(cityTip(c), ev); })
@@ -539,8 +547,51 @@
     );
   }
 
+  // ---------- guided stories ----------
+  const STORIES = [
+    { id: "near", label: "2030s: already locked in", scen: "ssp245", dec: 1, sort: "gap", region: REGIONS[0],
+      cities: ["San Diego", "Delhi", "Lagos", "Yakutsk"],
+      note: () => {
+        const gaps = cities.map((c) => val(c, "ssp585", 1) - val(c, "ssp126", 1));
+        return `In the 2030s the four pathways are almost indistinguishable: the median city's gap between SSP1-2.6 and SSP5-8.5 is <b>${fmtT(d3.median(gaps))} °C</b> and no city's exceeds ${fmtT(d3.max(gaps))} °C. Warming this decade is already committed. Drag the decade slider to watch the dots in the ranking spread apart.`;
+      } },
+    { id: "choice", label: "2090s: what the choice is worth", scen: "ssp585", dec: 7, sort: "gap", region: REGIONS[0],
+      cities: ["Yakutsk", "Riyadh", "Madrid", "San Diego"],
+      note: () => {
+        const gap = (c) => val(c, "ssp585", 7) - val(c, "ssp126", 7);
+        const top = [...cities].sort((a, b) => gap(b) - gap(a)).slice(0, 3);
+        return `By the 2090s, choosing SSP1-2.6 over SSP5-8.5 spares the typical city <b>${fmtT(d3.median(cities, gap))} °C</b>. The ranking is sorted by that gap: it is largest in ${top.map((c) => `${c.name} (${fmtT(gap(c))} °C)`).join(", ")}.`;
+      } },
+    { id: "arctic", label: "The far north warms fastest", scen: "ssp585", dec: 7, sort: "lat", region: REGIONS[0],
+      cities: ["Murmansk", "Yakutsk", "Anchorage", "Singapore"],
+      note: () => {
+        const north = cities.filter((c) => c.lat > 55), trop = cities.filter((c) => Math.abs(c.lat) < 23.5);
+        return `Sorted north to south under SSP5-8.5: the ${north.length} cities above 55°N warm a median <b>${fmtT(d3.median(north, (c) => val(c, "ssp585", 7)))} °C</b> by the 2090s, against <b>${fmtT(d3.median(trop, (c) => val(c, "ssp585", 7)))} °C</b> for the ${trop.length} tropical cities. Compare Singapore with the three Arctic cities below.`;
+      } },
+    { id: "hole", label: "Europe's North Atlantic exception", scen: "ssp126", dec: 7, sort: "value", region: "Europe",
+      cities: ["London", "Reykjavík", "Madrid", "Moscow"],
+      note: () => `Under SSP1-2.6, London (<b>${deg(val(byName.get("London"), "ssp126", 7))}</b>) and Reykjavík (<b>${deg(val(byName.get("Reykjavík"), "ssp126", 7))}</b>) barely warm by the 2090s, while Madrid and Moscow warm about four times as much. Hover the ocean south of Greenland on the map: most models simulate a cool patch there.` },
+  ];
+  d3.select("#stories").selectAll("button").data(STORIES).join("button")
+    .attr("type", "button").text((d) => d.label)
+    .on("click", (_, st) => {
+      stop();
+      Object.assign(state, { scen: st.scen, dec: st.dec, sort: st.sort, region: st.region, selected: [...st.cities], story: st.id });
+      d3.select("#region").property("value", st.region);
+      d3.selectAll("#sort button").attr("aria-pressed", function () { return this.dataset.k === state.sort; });
+      resetZoom();
+      update(true);
+    });
+  function renderStory() {
+    const st = STORIES.find((d) => d.id === state.story);
+    d3.selectAll("#stories button").attr("aria-pressed", (d) => d.id === state.story);
+    d3.select("#story-note").attr("hidden", st ? null : true).html(st ? st.note() : "");
+  }
+
   // ---------- update + resize ----------
-  function update() {
+  function update(keepStory) {
+    if (!keepStory) state.story = null;
+    renderStory();
     scenSel.selectAll("button")
       .attr("aria-checked", (s) => s === state.scen)
       .attr("aria-pressed", (s) => s === state.scen);
@@ -566,7 +617,7 @@
       zoomInit();
       zt = d3.zoomIdentity;
       svg.call(zoom.transform, d3.zoomIdentity);
-      update();
+      update(true);
     }, W ? 120 : 0);
   }).observe(document.querySelector(".grid"));
 })();

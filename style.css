@@ -71,6 +71,17 @@ select, input[list] {
 .headline { font-family: var(--serif); font-size: 21px; line-height: 1.35; margin: 22px 0 18px; max-width: 900px; }
 .headline b { font-variant-numeric: tabular-nums; }
 
+/* stories */
+.stories { margin: -4px 0 20px; display: flex; flex-direction: column; gap: 8px; }
+.story-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.story-btns button {
+  font: 500 13px var(--sans); color: var(--ink); background: var(--surface);
+  border: 1px solid var(--rule); border-radius: 999px; padding: 6px 14px; cursor: pointer;
+}
+.story-btns button:hover { background: var(--grid); }
+.story-btns button[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.story-note { margin: 0; max-width: 900px; font-size: 15px; color: var(--ink); border-left: 3px solid var(--accent); padding: 4px 0 4px 12px; }
+
 /* layout */
 .grid { display: grid; grid-template-columns: minmax(0, 1.75fr) minmax(300px, 1fr); gap: 20px; }
 .panel { background: var(--surface); border: 1px solid var(--rule); border-radius: 10px; padding: 16px 18px; min-width: 0; }

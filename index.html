@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="style.css?v=6">
+<link rel="stylesheet" href="style.css?v=9">
 </head>
 <body>
 <header class="masthead">
@@ -40,6 +40,12 @@
 </section>
 
 <p class="headline" id="headline" aria-live="polite"></p>
+
+<section class="stories" aria-label="Guided stories">
+  <span class="control-label">Start with a story</span>
+  <div class="story-btns" id="stories"></div>
+  <p class="story-note" id="story-note" hidden></p>
+</section>
 
 <main class="grid">
   <section class="panel panel-map">
@@ -99,6 +105,7 @@
     <li><em>Map and ranking</em>: decade means (e.g. 2050–2059) of the annual anomaly. The map grid is re-interpolated to a common 2.5° grid. <em>Time-series lines</em>: 9-year centred running mean, so year-to-year weather noise doesn't hide the trend.</li>
     <li>The colour scale and ranking axis are fixed across pathways and decades, so a colour or position always means the same number of degrees.</li>
   </ol>
+  <p class="muted">The "warming hole" story refers to the cooler patch south of Greenland that most CMIP6 models simulate as the Atlantic overturning circulation weakens; the page shows the model output and does not test that mechanism.</p>
   <p class="muted">Preprocessing code: <code>prep/fetch.py</code> and <code>prep/build.py</code> in this repository.</p>
 
   <!-- TEAM: write these two sections yourselves; the rubric penalises AI-written write-ups.
@@ -111,6 +118,6 @@
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7.9.0/dist/d3.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/topojson-client@3.1.0/dist/topojson-client.min.js"></script>
-<script src="js/main.js?v=6"></script>
+<script src="js/main.js?v=9"></script>
 </body>
 </html>
