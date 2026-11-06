@@ -16,7 +16,7 @@ BG, INK, MUTED, ACC = "#f7f5f0", "#1f1d1a", "#57524a", "#a3243b"
 
 # (seconds, title, body text or image path, caption)
 SLIDES = [
-    (8, "Warming by Scenario", None, "Team [TEAM NAME]  ·  Aryen Palkar · Jayden Liauw · Haoyu Lin\nDSC 106 · Project 3 checkpoint"),
+    (8, "Warming by Scenario", None, "Team Degrees of Choice  ·  Aryen Palkar · Jayden Liauw · Haoyu Lin\nDSC 106 · Project 3 checkpoint"),
     (14, "Dataset: CMIP6 (Google Cloud)", None,
      "Monthly near-surface air temperature (tas) · 9 climate models\n"
      "historical 1950–2014  +  SSP1-2.6 · SSP2-4.5 · SSP3-7.0 · SSP5-8.5 (2015–2100)\n\n"
